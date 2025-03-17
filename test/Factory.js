@@ -4,13 +4,11 @@ const { ethers } = require("hardhat")
 
 describe("Factory", function () {
 
-    it("should have a name", async function () {
+    async function deployFactoryFixture() {
         // Fetch the contract
         const Factory = await ethers.getContractFactory("Factory")
         // Deploy the contract
         const factory = await Factory.deploy()
-        //check the name
-        const name = await factory.name()
-        console.log(name);
-    })
+        return { factory }
+    }
 })
