@@ -6,15 +6,60 @@ contract Factory {
     uint256 public immutable i_fee;
     address public owner;
 
+    uint256 public totalTokens;
+    address[] public tokens;
+
+    mapping(address => TokenSale) public tokenToSale;
+
+    struct TokenSale {
+        address token;
+        string name;
+        address creator;
+        uint256 sold;
+        uint256 raised;
+        bool isOpen;
+    }
+
+    event Created(address indexed token);
+
     constructor(uint256 _fee) {
         i_fee = _fee;
         owner = msg.sender;
     }
 
-    function create() {
+    function getTokenSale(
+        uint256 _index
+    ) public view returns (TokenSale memory) {
+        return tokenToSale[tokens[_index]];
+    }
+
+    function create(
+        string memory _name,
+        string memory _symbol
+    ) external payable {
+        //Make sure that the FEE is correct
+        require(msg.value >= i_fee, "Factory: insufficient fee");
         // create a new token
+        Token token = new Token(msg.sender, _name, _symbol, 1_000_000 ether);
+
         //save the token for later use
+        tokens.push(address(token));
+
+        totalTokens++;
+
         //list the token for sale
-        //tell people it's Live
+        TokenSale memory sale = TokenSale(
+            address(token),
+            _name,
+            msg.sender,
+            0,
+            0,
+            true
+        );
+
+        tokenToSale[address(token)] = sale;
+
+        //Tell people it's Live
+        emit Created(address(token));
     }
 }
