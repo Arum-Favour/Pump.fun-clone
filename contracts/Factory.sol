@@ -62,4 +62,16 @@ contract Factory {
         //Tell people it's Live
         emit Created(address(token));
     }
+
+    function buy(address _token, uint256 _amount) external payable {
+        Token(_token).transfer(msg.sender, _amount);
+        // TokenSale storage sale = tokenToSale[_token];
+        // require(sale.isOpen, "Factory: token is not for sale");
+        // require(msg.value >= _amount, "Factory: insufficient funds");
+
+        // sale.sold += _amount;
+        // sale.raised += msg.value;
+
+        // payable(sale.creator).transfer(msg.value);
+    }
 }

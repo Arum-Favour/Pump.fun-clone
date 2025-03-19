@@ -8,7 +8,7 @@ describe("Factory", function () {
 
     async function deployFactoryFixture() {
         // Fetch accounts
-        const [deployer, creator] = await ethers.getSigners();
+        const [deployer, creator, buyer] = await ethers.getSigners();
         // Fetch the contract
         const Factory = await ethers.getContractFactory("Factory")
         // Deploy the contract
@@ -21,10 +21,21 @@ describe("Factory", function () {
         //Get the token Address
         const tokenAddress = await factory.tokens(0);
         const token = await ethers.getContractAt("Token", tokenAddress);
-        return { factory, token, deployer, creator }
+        return { factory, token, deployer, creator, buyer }
     }
 
-    describe("deployment", function () {
+    async function buyTokenFixture() {
+        const { factory, token, creator, buyer } = await deployFactoryFixture();
+
+        const AMOUNT = ethers.parseUnits("10000", 18);
+        const COST = ethers.parseUnits("1", 18);
+
+        //Buy Tokens
+        const transaction = await factory.connect(buyer).buy(await token.getAddress(), AMOUNT, { value: COST });
+        return { factory }
+    }
+
+    describe("Deployment", function () {
         it("should set a fee", async function () {
             const { factory } = await loadFixture(deployFactoryFixture)
             expect(await factory.i_fee()).to.equal(FEE)
@@ -75,4 +86,27 @@ describe("Factory", function () {
             expect(sale.isOpen).to.equal(true);
         })
     })
+    describe("Buying", function () {
+        const AMOUNT = ethers.parseUnits("10000", 18);
+        const COST = ethers.parseUnits("1", 18);
+
+        //check contract received the ETH
+        it("should update the ETH balance", async function () {
+            const { factory } = await loadFixture(buyTokenFixture);
+
+            const balance = await ethers.provider.getBalance(await factory.getAddress());
+
+            expect(balance).to.equal(FEE + COST);
+        })
+
+        //Check that buyer received tokens
+        it("Should update token balances", async function () {
+            const { factory, token, buyer } = await loadFixture(buyTokenFixture);
+            const balance = await token.balanceOf(buyer.address);
+            expect(balance).to.equal(AMOUNT);
+        })
+
+    })
 })
+
+
