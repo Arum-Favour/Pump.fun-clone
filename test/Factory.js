@@ -32,7 +32,7 @@ describe("Factory", function () {
 
         //Buy Tokens
         const transaction = await factory.connect(buyer).buy(await token.getAddress(), AMOUNT, { value: COST });
-        return { factory }
+        return { factory, token, creator, buyer }
     }
 
     describe("Deployment", function () {
@@ -101,11 +101,19 @@ describe("Factory", function () {
 
         //Check that buyer received tokens
         it("Should update token balances", async function () {
-            const { factory, token, buyer } = await loadFixture(buyTokenFixture);
+            const { token, buyer } = await loadFixture(buyTokenFixture);
             const balance = await token.balanceOf(buyer.address);
             expect(balance).to.equal(AMOUNT);
         })
 
+        it("should update the token sale", async function () {
+            const { factory, token } = await loadFixture(buyTokenFixture);
+
+            const sale = await factory.tokenToSale(await token.getAddress());
+
+            expect(sale.sold).to.equal(AMOUNT);
+            // expect(sale.raised).to.equal(COST);
+        })
     })
 })
 

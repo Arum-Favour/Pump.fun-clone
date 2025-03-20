@@ -21,6 +21,7 @@ contract Factory {
     }
 
     event Created(address indexed token);
+    event Buy(address indexed token, uint256 amount);
 
     constructor(uint256 _fee) {
         i_fee = _fee;
@@ -64,13 +65,20 @@ contract Factory {
     }
 
     function buy(address _token, uint256 _amount) external payable {
+        TokenSale storage sale = tokenToSale[_token];
+
+        //Check conditions
+
+        //Update the sale
+        sale.sold += _amount;
+        sale.raised += msg.value;
+        //Make sure fund raising goal is met
         Token(_token).transfer(msg.sender, _amount);
-        // TokenSale storage sale = tokenToSale[_token];
+        //Emit an event
+        emit Buy(_token, _amount);
+
         // require(sale.isOpen, "Factory: token is not for sale");
         // require(msg.value >= _amount, "Factory: insufficient funds");
-
-        // sale.sold += _amount;
-        // sale.raised += msg.value;
 
         // payable(sale.creator).transfer(msg.value);
     }
