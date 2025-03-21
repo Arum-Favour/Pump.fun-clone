@@ -124,7 +124,7 @@ contract Factory {
         token.transfer(sale.creator, token.balanceOf(address(this)));
 
         //Transfer ETH raised
-        (bool, s) = payable(sale.creator).call{value: sale.raised}("");
+        (bool s, ) = payable(sale.creator).call{value: sale.raised}("");
         require(s, "Factory: failed to send ETH to creator");
     }
 }
