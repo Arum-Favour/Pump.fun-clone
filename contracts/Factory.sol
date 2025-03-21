@@ -3,6 +3,9 @@ pragma solidity 0.8.28;
 import {Token} from "./Token.sol";
 
 contract Factory {
+    uint256 public constant TARGET = 3 ether;
+    uint256 public constant TOKEN_LIMIT = 500_000 ether;
+
     uint256 public immutable i_fee;
     address public owner;
 
@@ -32,6 +35,15 @@ contract Factory {
         uint256 _index
     ) public view returns (TokenSale memory) {
         return tokenToSale[tokens[_index]];
+    }
+
+    function getCost(uint256 _sold) public pure returns (uint256) {
+        uint256 floor = 0.0001 ether;
+        uint256 step = 0.0001 ether;
+        uint256 increment = 10000 ether;
+
+        uint256 cost = (step * (_sold / increment)) + floor;
+        return cost;
     }
 
     function create(
@@ -68,18 +80,51 @@ contract Factory {
         TokenSale storage sale = tokenToSale[_token];
 
         //Check conditions
+        require(sale.isOpen == true, "Factory: token is not for sale");
+        require(_amount >= 1 ether, "Factory: Amount too low");
+        require(_amount <= 10000 ether, "Factory: Amount exceeded");
+
+        //Calculate the price of 1 token based upon total bought
+        uint256 cost = getCost(sale.sold);
+
+        uint256 price = cost * (_amount / 10 ** 18);
+
+        //Make sure enough eth is sent
+        require(msg.value >= price, "Factory: insufficient ETH received");
 
         //Update the sale
         sale.sold += _amount;
-        sale.raised += msg.value;
+        sale.raised += price;
+
         //Make sure fund raising goal is met
+        if (sale.sold >= TOKEN_LIMIT || sale.raised >= TARGET) {
+            sale.isOpen = false;
+        }
+
         Token(_token).transfer(msg.sender, _amount);
+
         //Emit an event
         emit Buy(_token, _amount);
 
-        // require(sale.isOpen, "Factory: token is not for sale");
-        // require(msg.value >= _amount, "Factory: insufficient funds");
-
         // payable(sale.creator).transfer(msg.value);
+    }
+
+    function deposit(address _token) external {
+        //The remaining Token balance and the ETH raised
+        // would go into a liquidity pool like uniswap V3
+        // for simplicity we'll just transfer remaining
+        //tokens and ETH raised to the creator.
+
+        Token token = Token(_token);
+        TokenSale memory sale = tokenToSale[_token];
+
+        require(sale.isOpen == false, "Factory: token is still for sale");
+
+        //Transfer the remaining tokens to the creator
+        token.transfer(sale.creator, token.balanceOf(address(this)));
+
+        //Transfer ETH raised
+        (bool, s) = payable(sale.creator).call{value: sale.raised}("");
+        require(s, "Factory: failed to send ETH to creator");
     }
 }

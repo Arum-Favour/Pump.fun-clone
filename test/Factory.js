@@ -32,6 +32,7 @@ describe("Factory", function () {
 
         //Buy Tokens
         const transaction = await factory.connect(buyer).buy(await token.getAddress(), AMOUNT, { value: COST });
+        await transaction.wait();
         return { factory, token, creator, buyer }
     }
 
@@ -112,7 +113,17 @@ describe("Factory", function () {
             const sale = await factory.tokenToSale(await token.getAddress());
 
             expect(sale.sold).to.equal(AMOUNT);
-            // expect(sale.raised).to.equal(COST);
+            expect(sale.raised).to.equal(COST);
+            expect(sale.isOpen).to.equal(true);
+        })
+
+        it("should increase base cost", async function () {
+            const { factory, token } = await loadFixture(buyTokenFixture);
+
+            const sale = await factory.tokenToSale(await token.getAddress());
+            const cost = await factory.getCost(sale.sold);
+
+            expect(cost).to.be.equal(ethers.parseUnits("0.0002"));
         })
     })
 })
