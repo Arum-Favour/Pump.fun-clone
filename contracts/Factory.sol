@@ -128,9 +128,10 @@ contract Factory {
         require(s, "Factory: failed to send ETH to creator");
     }
 
-    function withdrawal(uint256 _amount)external {}
-    require(msg.sender == owner, "Factory: Not owner");
+    function withdraw(uint256 _amount) external {
+        require(msg.sender == owner, "Factory: Not owner");
 
-    (bool s,) = payable(owner).call{value: _amount}("");
-    require(success, "Factory: ETH transfer failed");
+        (bool s, ) = payable(owner).call{value: _amount}("");
+        require(s, "Factory: ETH transfer failed");
+    }
 }
