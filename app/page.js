@@ -9,6 +9,7 @@ import List from "./components/List"
 import Token from "./components/Token"
 import Trade from "./components/Trade"
 
+
 // ABIs & Config
 import Factory from "./abis/Factory.json"
 import config from "./config.json"
@@ -18,8 +19,10 @@ export default function Home() {
 
   return (
     <div className="page">
+      <Header account={"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"} setAccount={""} />
 
-      <h1 style={{ padding: "1em" }}>fun.pump</h1>
+
+
 
     </div>
   );
