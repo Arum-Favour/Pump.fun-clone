@@ -16,13 +16,25 @@ import config from "./config.json"
 import images from "./images.json"
 
 export default function Home() {
+  const [provider, setProvider] = useState(null);
+  const [account, setAccount] = useState(null);
 
+  async function loadBlockchain() {
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    setProvider(provider);
+
+    const network = await provider.getNetwork();
+
+
+    const factory = new ethers.Contract(config[network.chainId].factory.address, Factory)
+  }
+
+  useEffect(() => {
+    loadBlockchain()
+  }, [])
   return (
     <div className="page">
-      <Header account={"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"} setAccount={""} />
-
-
-
+      <Header account={account} setAccount={setAccount} />
 
     </div>
   );
