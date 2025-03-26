@@ -26,7 +26,10 @@ export default function Home() {
     const network = await provider.getNetwork();
 
 
-    const factory = new ethers.Contract(config[network.chainId].factory.address, Factory)
+    const factory = new ethers.Contract(config[network.chainId].factory.address, Factory, provider)
+    //const fee = await factory.fee();
+    console.log(factory.getToken());
+
   }
 
   useEffect(() => {
