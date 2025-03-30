@@ -18,6 +18,8 @@ import images from "./images.json"
 export default function Home() {
   const [provider, setProvider] = useState(null);
   const [account, setAccount] = useState(null);
+  const [factory, setFactory] = useState(null);
+  const [fee, setFee] = useState(0);
 
   async function loadBlockchain() {
     const provider = new ethers.BrowserProvider(window.ethereum);
@@ -26,10 +28,10 @@ export default function Home() {
     const network = await provider.getNetwork();
 
 
-    const factory = new ethers.Contract(config[network.chainId].factory.address, Factory, provider)
-    //const fee = await factory.fee();
-    console.log(factory.getToken());
-
+    const factory = new ethers.Contract(config[network.chainId].factory.address, Factory, provider);
+    setFactory(factory)
+    const fee = await factory.i_fee();
+    setFee(fee);
   }
 
   useEffect(() => {
