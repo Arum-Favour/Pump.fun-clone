@@ -20,8 +20,10 @@ export default function Home() {
   const [account, setAccount] = useState(null);
   const [factory, setFactory] = useState(null);
   const [fee, setFee] = useState(0);
-  const [showCreate, setShowCreate] = useState(false);
   const [tokens, setTokens] = useState([]);
+  const [showCreate, setShowCreate] = useState(false);
+  const [showTrade, setShowTrade] = useState(false)
+
 
   function toggleCreate() {
     showCreate ? setShowCreate(false) : setShowCreate(true);
@@ -51,7 +53,7 @@ export default function Home() {
         creator: tokenSale.creator,
         sold: tokenSale.sold,
         raised: tokenSale.raised,
-        isOpen: tokenSale, isOpen,
+        isOpen: tokenSale.isOpen,
         image: images[i]
       }
       tokens.push(token)
@@ -75,6 +77,23 @@ export default function Home() {
 
           </button>
         </div>
+
+        <div className="listings">
+          <h1>new listings</h1>
+
+          <div className="tokens">
+            {!account ? (
+              <p>Please Connect wallet</p>
+            ) : tokens.length === 0 ? (
+              <p>No tokens listed</p>
+            ) : (
+              tokens.map((tokens, index) => (
+                <Token toggleTrade={() => { }} token={tokens} key={index} />
+              ))
+            )}
+          </div>
+        </div>
+
       </main>
 
       {showCreate && (
